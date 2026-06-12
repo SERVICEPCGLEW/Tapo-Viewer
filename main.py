@@ -390,12 +390,11 @@ class TapoViewer(QMainWindow):
     def play_stream(self, url):
         if hasattr(self, 'player') and self.player is not None:
             self.player.stop()
-        # Use QTimer to delay the start of the new stream by 600ms
+        # Use QTimer to delay the start of the new stream by 1500ms
         # This gives the Tapo camera enough time to close the old RTSP socket
-        QTimer.singleShot(600, lambda: self._delayed_play(url))
+        QTimer.singleShot(1500, lambda: self._delayed_play(url))
         
     def _delayed_play(self, url):
-        self.init_vlc()
         media = self.vlc_instance.media_new(url)
         self.player.set_media(media)
         self.player.play()
