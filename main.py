@@ -315,7 +315,7 @@ class TapoViewer(QMainWindow):
         os.makedirs(rec_dir, exist_ok=True)
         
         now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"Tapo_{now}.mp4"
+        filename = f"Tapo_{now}.ts"
         filepath = os.path.join(rec_dir, filename)
         
         quality_idx = self.settings.value("record_quality_idx", 0, type=int)
@@ -326,22 +326,26 @@ class TapoViewer(QMainWindow):
         user = self.settings.value("rtsp_user", "admin")
         pwd = self.settings.value("rtsp_pwd", "")
         
-        self.record_vlc_instance = vlc.Instance(
-            "--avcodec-hw=any", 
-            "--drop-late-frames",
-            "--rtsp-tcp",
-            "--network-caching=500"
-        )
+        if not hasattr(self, 'record_vlc_instance'):
+            vlc_args = [
+                '--quiet',
+                '--no-xlib',
+                '--drop-late-frames',
+                '--skip-frames',
+                '--no-sout-audio' # Disable audio output for recording to allow TS format with Tapo
+            ]
+            self.record_vlc_instance = vlc.Instance(vlc_args)
+        
         self.record_player = self.record_vlc_instance.media_player_new()
         
         if quality == "stream1_720p":
-            sout = f"#transcode{{vcodec=h264,vb=1500,scale=Auto,width=1280,height=720}}:std{{access=file,mux=mp4,dst='{filepath}'}}"
+            sout = f"#transcode{{vcodec=h264,vb=1500,scale=Auto,width=1280,height=720}}:std{{access=file,mux=ts,dst='{filepath}'}}"
             stream_url = f"rtsp://{user}:{pwd}@{ip}:554/stream1"
         elif quality == "stream1_1080p":
-            sout = f"#transcode{{vcodec=h264,vb=3000,scale=Auto,width=1920,height=1080}}:std{{access=file,mux=mp4,dst='{filepath}'}}"
+            sout = f"#transcode{{vcodec=h264,vb=3000,scale=Auto,width=1920,height=1080}}:std{{access=file,mux=ts,dst='{filepath}'}}"
             stream_url = f"rtsp://{user}:{pwd}@{ip}:554/stream1"
         else:
-            sout = f"#std{{access=file,mux=mp4,dst='{filepath}'}}"
+            sout = f"#std{{access=file,mux=ts,dst='{filepath}'}}"
             stream_url = f"rtsp://{user}:{pwd}@{ip}:554/{quality}"
 
         self.record_player.set_mrl(stream_url, f":sout={sout}")
