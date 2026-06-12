@@ -6,7 +6,7 @@ Un visor ligero, flotante y minimalista para cámaras Tapo (y otras cámaras com
 
 - **Flotante y Minimalista**: Interfaz sin bordes, pensada para quedarse en una esquina de la pantalla sin estorbar.
 - **Fijar por Encima (Always on Top)**: Un botón integrado de chincheta (📌) para mantener la cámara siempre visible por sobre otras ventanas. El diseño usa una capa transparente nativa de Windows para evitar bordes oscuros.
-- **Grabación en Segundo Plano**: Graba directamente el flujo de video a archivos MP4 sin interrumpir la visualización principal, usando un motor VLC independiente.
+- **Grabación en Segundo Plano Segura**: Graba directamente el flujo de video a formato .ts (Transport Stream), un estándar robusto que garantiza que las grabaciones NO se corrompan ante cierres inesperados, apagones o cortes de red. Funciona de manera paralela sin interrumpir tu visualización, usando un motor VLC independiente.
 - **Opciones de Calidad (Transcoding en tiempo real)**: Graba en calidad Máxima (2K Nativo), Baja (360p Nativo), o utiliza el codificador integrado para comprimir a 1080p o 720p al vuelo.
 - **Programador de Grabación (Timer)**: Configura una hora de inicio y fin automática; la aplicación se encargará de grabar tu cámara aunque no estés frente a la PC.
 - **Doble Clic para Expandir**: Alterna rápidamente entre la visualización en ventana pequeña y pantalla completa (calidad 2K) haciendo doble clic en el video.
