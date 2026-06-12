@@ -103,6 +103,7 @@ class ConfigDialog(QDialog):
         
         self.settings.setValue("record_dir", self.record_dir_input.text().strip())
         self.settings.setValue("record_quality_idx", self.record_quality.currentIndex())
+        self.settings.setValue("record_quality", self.record_quality.currentData())
         self.settings.setValue("record_format", self.record_format.currentText())
         self.settings.setValue("record_audio", self.record_audio.currentData())
         
@@ -348,9 +349,7 @@ class TapoViewer(QMainWindow):
         filename = f"Tapo_{now}.{format_str}"
         filepath = os.path.join(rec_dir, filename)
         
-        quality_idx = self.settings.value("record_quality_idx", 0, type=int)
-        qualities = ["stream1", "stream2", "stream1_720p", "stream1_1080p"]
-        quality = qualities[quality_idx] if quality_idx < len(qualities) else "stream1"
+        quality = self.settings.value("record_quality", "stream1")
         
         ip = self.settings.value("rtsp_ip", "192.168.1.xxx")
         user = self.settings.value("rtsp_user", "admin")
@@ -392,6 +391,13 @@ class TapoViewer(QMainWindow):
                 sout = f"#std{{access=file,mux={format_str},dst='{filepath}'}}"
             stream_url = f"rtsp://{user}:{pwd}@{ip}:554/{quality}"
 
+        from PyQt6.QtWidgets import QMessageBox
+        if "stream1" in stream_url and self.is_2k_mode:
+            QMessageBox.warning(self, "Límite de la Cámara", "Las cámaras Tapo no permiten visualizar y grabar la máxima calidad (2K) al mismo tiempo en el mismo equipo.\n\nPara poder grabar sin fallos (archivos de 0 KB), el visor en vivo cambiará automáticamente a calidad baja (360p).")
+            self.toggle_visibility()
+            import time
+            time.sleep(1) # Dale 1 segundo a la camara para liberar el socket de stream1
+            
         self.record_player.set_mrl(stream_url, f":sout={sout}")
         self.record_player.play()
         
