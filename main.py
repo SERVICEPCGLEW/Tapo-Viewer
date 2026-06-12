@@ -5,7 +5,7 @@ import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QLabel, QSystemTrayIcon, QMenu, QFrame, QSizeGrip,
                              QPushButton, QDialog, QFormLayout, QLineEdit, QDialogButtonBox, QMessageBox,
-                             QCheckBox, QComboBox, QTimeEdit, QGraphicsColorizeEffect)
+                             QCheckBox, QComboBox, QTimeEdit, QGraphicsColorizeEffect, QTabWidget)
 from PyQt6.QtCore import Qt, QPoint, QSettings, QSize, QTimer, QTime
 from PyQt6.QtGui import QIcon, QAction, QFont, QGuiApplication
 import vlc
@@ -13,11 +13,19 @@ import vlc
 class ConfigDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Configuración de Cámara")
+        self.setWindowTitle("Configuracion de Camara")
         self.settings = QSettings("TapoViewer", "WindowSettings")
         
         layout = QVBoxLayout(self)
-        form_layout = QFormLayout()
+        
+        self.tabs = QTabWidget()
+        self.tab_network = QWidget()
+        self.tab_record = QWidget()
+        self.tabs.addTab(self.tab_network, "Red / RTSP")
+        self.tabs.addTab(self.tab_record, "Grabacion")
+        
+        # Red / RTSP Tab
+        form_network = QFormLayout(self.tab_network)
         
         self.ip_input = QLineEdit(self.settings.value("rtsp_ip", "192.168.1.xxx"))
         self.user_input = QLineEdit(self.settings.value("rtsp_user", "admin"))
@@ -27,6 +35,15 @@ class ConfigDialog(QDialog):
         self.path2k_input = QLineEdit(self.settings.value("stream_1_path", "/stream1"))
         self.path360_input = QLineEdit(self.settings.value("stream_2_path", "/stream2"))
         
+        form_network.addRow("IP / Hostname:", self.ip_input)
+        form_network.addRow("Usuario RTSP:", self.user_input)
+        form_network.addRow("Contrasena RTSP:", self.pwd_input)
+        form_network.addRow("Ruta Alta Calidad (2K):", self.path2k_input)
+        form_network.addRow("Ruta Baja Calidad (360p):", self.path360_input)
+        
+        # Grabacion Tab
+        form_record = QFormLayout(self.tab_record)
+        
         default_dir = os.path.join(os.path.expanduser("~"), "Videos", "TapoRecords")
         self.record_dir_input = QLineEdit(self.settings.value("record_dir", default_dir))
         
@@ -34,12 +51,24 @@ class ConfigDialog(QDialog):
         self.record_quality.addItem("Baja (360p) - Nativa", "stream2")
         self.record_quality.addItem("Media Baja (720p) - Comprimida", "stream1_720p")
         self.record_quality.addItem("Media Alta (1080p) - Comprimida", "stream1_1080p")
-        self.record_quality.addItem("Máxima (Original 2K/1080p) - Nativa", "stream1")
-        
+        self.record_quality.addItem("Maxima (Original 2K/1080p) - Nativa", "stream1")
         quality_idx = self.settings.value("record_quality_idx", 0, type=int)
         self.record_quality.setCurrentIndex(quality_idx)
         
-        self.schedule_checkbox = QCheckBox("Activar Grabación Programada")
+        self.record_format = QComboBox()
+        formats = ["mp4", "avi", "mkv", "ts"]
+        self.record_format.addItems(formats)
+        current_format = self.settings.value("record_format", "ts")
+        if current_format in formats:
+            self.record_format.setCurrentText(current_format)
+            
+        self.record_audio = QComboBox()
+        self.record_audio.addItem("Sin Audio (Recomendado para evitar crashes)", False)
+        self.record_audio.addItem("Con Audio (Riesgo con ALAW)", True)
+        audio_val = self.settings.value("record_audio", False, type=bool)
+        self.record_audio.setCurrentIndex(1 if audio_val else 0)
+        
+        self.schedule_checkbox = QCheckBox("Activar Grabacion Programada")
         self.schedule_checkbox.setChecked(self.settings.value("schedule_enabled", False, type=bool))
         
         self.time_start = QTimeEdit()
@@ -50,18 +79,15 @@ class ConfigDialog(QDialog):
         self.time_end.setDisplayFormat("HH:mm")
         self.time_end.setTime(self.settings.value("schedule_end", QTime(18, 0), type=QTime))
         
-        form_layout.addRow("IP / Hostname:", self.ip_input)
-        form_layout.addRow("Usuario RTSP:", self.user_input)
-        form_layout.addRow("Contraseña RTSP:", self.pwd_input)
-        form_layout.addRow("Ruta Alta Calidad (2K):", self.path2k_input)
-        form_layout.addRow("Ruta Baja Calidad (360p):", self.path360_input)
-        form_layout.addRow("Carpeta de Grabaciones:", self.record_dir_input)
-        form_layout.addRow("Calidad de Grabación:", self.record_quality)
-        form_layout.addRow("", self.schedule_checkbox)
-        form_layout.addRow("Hora de Inicio:", self.time_start)
-        form_layout.addRow("Hora de Fin:", self.time_end)
+        form_record.addRow("Carpeta de Grabaciones:", self.record_dir_input)
+        form_record.addRow("Calidad de Grabacion:", self.record_quality)
+        form_record.addRow("Formato Contenedor:", self.record_format)
+        form_record.addRow("Canal de Audio:", self.record_audio)
+        form_record.addRow("", self.schedule_checkbox)
+        form_record.addRow("Hora de Inicio:", self.time_start)
+        form_record.addRow("Hora de Fin:", self.time_end)
         
-        layout.addLayout(form_layout)
+        layout.addWidget(self.tabs)
         
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(self.save_settings)
@@ -77,6 +103,9 @@ class ConfigDialog(QDialog):
         
         self.settings.setValue("record_dir", self.record_dir_input.text().strip())
         self.settings.setValue("record_quality_idx", self.record_quality.currentIndex())
+        self.settings.setValue("record_format", self.record_format.currentText())
+        self.settings.setValue("record_audio", self.record_audio.currentData())
+        
         self.settings.setValue("schedule_enabled", self.schedule_checkbox.isChecked())
         self.settings.setValue("schedule_start", self.time_start.time())
         self.settings.setValue("schedule_end", self.time_end.time())
@@ -314,8 +343,9 @@ class TapoViewer(QMainWindow):
         rec_dir = self.settings.value("record_dir", default_dir)
         os.makedirs(rec_dir, exist_ok=True)
         
+        format_str = self.settings.value("record_format", "ts")
         now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"Tapo_{now}.ts"
+        filename = f"Tapo_{now}.{format_str}"
         filepath = os.path.join(rec_dir, filename)
         
         quality_idx = self.settings.value("record_quality_idx", 0, type=int)
@@ -326,26 +356,28 @@ class TapoViewer(QMainWindow):
         user = self.settings.value("rtsp_user", "admin")
         pwd = self.settings.value("rtsp_pwd", "")
         
-        if not hasattr(self, 'record_vlc_instance'):
-            vlc_args = [
-                "--avcodec-hw=any", 
-                "--drop-late-frames",
-                "--rtsp-tcp",
-                "--network-caching=500",
-                "--no-sout-audio"
-            ]
-            self.record_vlc_instance = vlc.Instance(*vlc_args)
+        vlc_args = [
+            "--avcodec-hw=any", 
+            "--drop-late-frames",
+            "--rtsp-tcp",
+            "--network-caching=500"
+        ]
         
+        audio_enabled = self.settings.value("record_audio", False, type=bool)
+        if not audio_enabled:
+            vlc_args.append("--no-sout-audio")
+            
+        self.record_vlc_instance = vlc.Instance(*vlc_args)
         self.record_player = self.record_vlc_instance.media_player_new()
         
         if quality == "stream1_720p":
-            sout = f"#transcode{{vcodec=h264,vb=1500,scale=Auto,width=1280,height=720}}:std{{access=file,mux=ts,dst='{filepath}'}}"
+            sout = f"#transcode{{vcodec=h264,vb=1500,scale=Auto,width=1280,height=720}}:std{{access=file,mux={format_str},dst='{filepath}'}}"
             stream_url = f"rtsp://{user}:{pwd}@{ip}:554/stream1"
         elif quality == "stream1_1080p":
-            sout = f"#transcode{{vcodec=h264,vb=3000,scale=Auto,width=1920,height=1080}}:std{{access=file,mux=ts,dst='{filepath}'}}"
+            sout = f"#transcode{{vcodec=h264,vb=3000,scale=Auto,width=1920,height=1080}}:std{{access=file,mux={format_str},dst='{filepath}'}}"
             stream_url = f"rtsp://{user}:{pwd}@{ip}:554/stream1"
         else:
-            sout = f"#std{{access=file,mux=ts,dst='{filepath}'}}"
+            sout = f"#std{{access=file,mux={format_str},dst='{filepath}'}}"
             stream_url = f"rtsp://{user}:{pwd}@{ip}:554/{quality}"
 
         self.record_player.set_mrl(stream_url, f":sout={sout}")
