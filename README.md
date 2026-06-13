@@ -1,56 +1,58 @@
-# Tapo Viewer v3.0
+# Tapo Viewer: Visor y Grabador Flotante para Cámaras de Seguridad (RTSP)
 
-Un visor ligero, flotante y minimalista para cámaras Tapo (y otras cámaras compatibles con RTSP), construido con Python, PyQt6 y VLC.
+![Tapo Viewer Interfaz - Visor Minimalista](screenshot.png)
 
-## Características Principales
+**Tapo Viewer** es el mejor software gratuito, ligero y minimalista para monitorear y grabar cámaras de seguridad Tapo (y cualquier cámara compatible con protocolo RTSP) directamente desde tu PC con Windows. Desarrollado con Python, PyQt6 y el potente motor de video de VLC, es la alternativa perfecta a los visores pesados tradicionales.
 
-- **Flotante y Minimalista**: Interfaz sin bordes, pensada para quedarse en una esquina de la pantalla sin estorbar.
-- **Fijar por Encima (Always on Top)**: Un botón integrado de chincheta (📌) para mantener la cámara siempre visible por sobre otras ventanas. El diseño usa una capa transparente nativa de Windows para evitar bordes oscuros.
-- **Grabación Ultra-Robusta**: Graba el flujo de video en segundo plano de manera simultánea sin afectar el rendimiento de visualización. Ahora utiliza el protocolo TCP para garantizar que no se pierdan fotogramas clave ni se generen archivos vacíos debido a inestabilidades del Wi-Fi.
-- **Soporte Multi-Formato y Audio**: Exporta tus grabaciones a `.ts` (a prueba de fallos de energía y apagones), `.mp4`, `.mkv` y `.avi`. Elige si quieres grabar "Con Audio" (realizando una conversión inteligente de ALAW a MP3 al vuelo) o "Sin Audio".
-- **Gestión Inteligente de Límite de Cámara**: Las cámaras Tapo rechazan conexiones duplicadas a la misma calidad. Tapo Viewer resolverá esto automáticamente para que el grabador pueda funcionar en 2K mientras se visualiza en 360p en modo ventana, sin que las conexiones colisionen.
-- **Programador de Grabación (Timer)**: Configura una hora de inicio y fin automática; la aplicación se encargará de grabar tu cámara aunque no estés frente a la PC.
-- **Doble Clic para Expandir**: Alterna rápidamente entre la visualización en ventana pequeña y pantalla completa (calidad 2K) haciendo doble clic en el video.
-- **Configuración Dinámica**: Ajusta la IP de la cámara, credenciales RTSP, directorio de grabaciones y parámetros de visualización directamente desde la bandeja del sistema.
+## 🌟 Características Principales (Features)
 
-## Requisitos Previos
+*   **Interfaz Flotante y Sin Bordes (Picture-in-Picture)**: Monitorea tu cámara de seguridad en una esquina de tu monitor sin interrumpir tu trabajo. Diseño limpio, sin marcos molestos.
+*   **Modo "Fijar por Encima" (Always on Top)**: Un botón integrado de chincheta (📌) mantiene el video visible sobre cualquier otra ventana, con transparencias nativas que evitan los bordes oscuros en Windows 10/11.
+*   **Motor de Grabación Ultra-Robusto (RTSP-TCP)**: Graba el flujo de video en segundo plano sin afectar la visualización en vivo. Emplea el protocolo TCP forzado para asegurar 0 pérdida de paquetes y evitar archivos vacíos (0 KB) ocasionados por redes Wi-Fi inestables.
+*   **Soporte Multi-Formato y Transcodificación Inteligente**: 
+    *   Exporta a formatos `.ts`, `.mp4`, `.mkv` y `.avi`.
+    *   El formato `.ts` te protege al 100% contra cortes de luz, evitando que el archivo de video se corrompa.
+    *   *Conversión de Audio en Vivo*: Convierte automáticamente el códec propietario ALAW de las cámaras IP a MP3 universal si decides grabar "Con Audio".
+*   **Anti-Colisión de Red (Gestión de Streams)**: Resuelve automáticamente el límite impuesto por las cámaras (Error de conexión simultánea). Si el grabador necesita la máxima resolución (2K Stream 1), el visor en miniatura cambiará de forma inteligente e imperceptible a 360p (Stream 2), evitando cuelgues.
+*   **Programador Automático (Timer DVR)**: Convierte tu PC en un NVR/DVR. Configura rutinas de grabación con hora de inicio y fin para vigilar cuando no estás.
+*   **Expansión Rápida (Doble Clic)**: Cambia de la vista de miniatura a pantalla completa en resolución 2K con un simple doble clic sobre el reproductor.
 
-Para ejecutar la aplicación o compilarla, es **obligatorio** tener instalado:
+## ⚙️ Requisitos Previos
 
-- **VLC Media Player** (El motor de video utiliza las librerías nativas de VLC para conectarse al RTSP).
-- **Python 3.x** (Solo si vas a correr o compilar el código fuente).
+Para ejecutar la aplicación en tu entorno local o compilarla, es **obligatorio** contar con:
+- **VLC Media Player**: El motor de video utiliza las librerías nativas de VLC para la decodificación por hardware del protocolo RTSP.
+- **Python 3.x**: Solo necesario si deseas compilar o modificar el código fuente.
 
-## Instalación Automática
+## 🚀 Instalación y Despliegue Rápido
 
-Se incluye un script para facilitar la instalación del motor VLC y las librerías necesarias.
+El proyecto incluye scripts automatizados para instalar las dependencias con un solo clic.
 
-1. Clona o descarga este repositorio en tu PC.
-2. Haz doble clic en el archivo install_dependencies.bat.
-3. El script instalará automáticamente VLC usando winget y descargará las dependencias de Python listadas en equirements.txt.
+1.  Clona o descarga este repositorio en tu equipo.
+2.  Haz doble clic en el archivo `install_dependencies.bat`.
+3.  El sistema instalará automáticamente VLC (vía `winget`) y todas las librerías de Python requeridas en `requirements.txt`.
 
-## Uso
+## 💻 Guía de Uso
 
-### A partir del código fuente
-Puedes iniciar la aplicación directamente corriendo el script:
-`ash
+### Iniciar desde el código fuente
+Para probar el proyecto de forma directa:
+```bash
 python main.py
-`
+```
 
-### Versión Ejecutable (.exe)
-Si prefieres generar un ejecutable .exe portátil que no requiera abrir la consola:
+### Generar la Versión Ejecutable (.exe Portátil)
+Si deseas generar un ejecutable independiente para distribuirlo sin requerir Python:
+1.  Ejecuta el archivo `build.bat`.
+2.  Espera a que finalice el proceso de *PyInstaller*.
+3.  Encontrarás tu aplicación lista y empaquetada en la carpeta `dist/Tapo Viewer.exe`.
 
-1. Ejecuta el archivo uild.bat.
-2. Espera a que termine el proceso de PyInstaller.
-3. Busca tu aplicación lista en la carpeta dist/Tapo Viewer.exe.
+## 🛠️ Controles y Ajustes
 
-## Uso de la Aplicación
+*   **Reubicar el visor**: Haz clic izquierdo y mantén presionado sobre el video para arrastrar la ventana por la pantalla.
+*   **Grabación Manual**: Pulsa el botón `REC` visible en la esquina superior izquierda.
+*   **Menú de Bandeja (System Tray)**: Busca el ícono negro de la cámara junto al reloj de Windows. Haz clic derecho para acceder a las opciones de "Configuración", "Iniciar con Windows", o "Acerca de".
+*   **Conexión Inicial**: Ve a "Configuración" y completa la IP local de tu cámara (ej. `192.168.1.xxx`), el usuario y la contraseña (credenciales RTSP/ONVIF generadas en la app Tapo).
 
-- **Mover la ventana**: Arrastra el video con el clic izquierdo del mouse para reubicarlo.
-- **Grabar Video**: Haz clic en el botón REC o programa el temporizador desde los ajustes.
-- **Ocultar/Ajustes**: Busca el ícono negro de la cámara en la bandeja de iconos (cerca de la hora en Windows). Haz clic derecho para ver las opciones de configuración.
-- **Conectar tu cámara**: Ve a "Configuración" e introduce la IP local de tu cámara Tapo (ej. 192.168.1.xxx) y las credenciales RTSP.
-
-## Tecnologías Utilizadas
-- **PyQt6**: Creación de interfaz transparente sin bordes, overlay windows y manejo de eventos.
-- **python-vlc**: Como *wrapper* de libVLC para reproducir y grabar (std/transcode) video RTSP con aceleración por hardware.
-- **PyInstaller**: Empaquetado en un ejecutable autocontenido.
+## 🧰 Stack Tecnológico
+*   **PyQt6**: Gestión de interfaces GUI, overlay windows nativas y systray.
+*   **python-vlc**: Wrapper de `libVLC` para el manejo avanzado de flujos de video IP (Decodificación por Hardware y transcodificación de red).
+*   **PyInstaller**: Empaquetado binario.
