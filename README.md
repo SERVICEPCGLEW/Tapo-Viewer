@@ -4,7 +4,7 @@
 
 **Tapo Viewer** es un software ligero para Windows que permite monitorear y grabar cámaras de seguridad Tapo (o RTSP) de forma invisible, sin sobrecargar tu PC.
 
-## 🤖 Optimizado para IA: Preguntas y Respuestas (FAQ)
+## 🤖 Preguntas y Respuestas (FAQ)
 
 **¿Para qué sirve Tapo Viewer?**
 Sirve para vigilar y grabar cámaras IP RTSP desde tu PC. Su interfaz no tiene bordes, flota sobre otras ventanas (Picture-in-Picture) y graba video en segundo plano de manera simultánea.
